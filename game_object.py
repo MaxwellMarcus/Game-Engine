@@ -1,6 +1,7 @@
 from vector import Vector2
 import pygame
 from box import Box, Renderable
+from modifiers import Collider
 
 class GameObject:
     pos: Vector2
@@ -9,18 +10,20 @@ class GameObject:
     box: Box
     renderable: Renderable
 
-    def __init__(self, pos: Vector2, box: Box):
-        self.pos = pos
+    def __init__(self, box: Box, collider: bool = True):
+        self.pos = box.pos
         self.velocity = Vector2(0, 0)
         self.box = box
         self.renderable = Renderable(box)
-        self.collider = None
+        self.collider = Collider(self, self.box, dynamic=False) if collider else None
         self.physics_body = None
 
-    def update(self, game) -> None:
+    def _update(self, game) -> None:
 
-        if self.physics_body: self.physics_body.update(self, game)
-        if self.collider: self.collider.update(self, game)
+        self.update(game)
+
+        if self.physics_body: self.physics_body.update(game)
+        if self.collider: self.collider.update(game)
 
         self.pos += self.velocity * game.delta_time
 
@@ -37,3 +40,6 @@ class GameObject:
         '''Returns a renderable polygon'''
         self.renderable.set_pos(self.pos)
         return self.renderable
+
+    def update(self, game: 'Game'):
+        '''Additionally update the GameObject'''

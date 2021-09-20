@@ -1,6 +1,6 @@
 import pygame
 from game_object import GameObject
-from typing import Callable
+from typing import Callable, List
 import time
 
 class Game:
@@ -13,7 +13,12 @@ class Game:
         self.time = time.time()
 
         pygame.init()
-        self.surface = pygame.display.set_mode((self.width, self.height))
+
+        if not self.width or not self.height:
+            display_info = pygame.display.Info()
+            self.width, self.height = display_info.current_w, display_info.current_h
+
+        self.surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
         self.keys = []
 
@@ -21,13 +26,18 @@ class Game:
 
         self.objects = []
 
-    def add_gameobject(self, object: GameObject) -> None:
-        '''Adds a game object to the list of registered game objects'''
-        self.objects.append(object)
+    def add_gameobject(self, *args: List[GameObject]) -> None:
+        '''Adds a game object(s) to the list of registered game objects'''
+        for obj in args:
+            self.objects.append(obj)
 
-    def remove_gameobject(self, object: GameObject) -> None:
+    def remove_gameobject(self, obj: GameObject) -> None:
         '''Removes a game object from the list of registered game objects'''
-        self.objects.remove(object)
+        self.objects.remove(obj)
+
+    def get_collidable(self):
+        '''Gets the Game Objects that can be collided with'''
+        return filter(lambda o: o.collider and o.collider.collidable, self.objects)
 
     def add_key_event(self, f: Callable, key: str):
         '''Registers a function to a key event'''
@@ -46,6 +56,8 @@ class Game:
         #Record Events
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    quit()
                 self.keys.append(event.key)
 
             elif event.type == pygame.KEYUP:
@@ -62,7 +74,7 @@ class Game:
 
         #Update game objects
         for object in self.objects:
-            object.update(self)
+            object._update(self)
 
         #Render Game Objects
         self.render()

@@ -4,10 +4,8 @@ from abc import ABC, abstractmethod
 
 class LineType(ABC):
     vertical: bool = False
-    m: int
-    b: int
-    p1: Vector2 
-    p2: Vector2
+    m: float 
+    b: float 
 
     def intersects(self, line: 'LineType') -> Vector2:
         '''Returns the point where another line intersects'''
@@ -27,7 +25,6 @@ class LineType(ABC):
             p = Vector2((line.b - self.b) / self.m, line.b)
 
         elif not self.m:
-            print('Self Horizontal')
             p = Vector2((self.b - line.b) / line.m, self.b)
 
         else:
@@ -43,6 +40,9 @@ class LineType(ABC):
     def __str__(self) -> str:
         return (f'y = ({self.m})x + {self.b}' if not self.vertical else f'x = {self.p1.x}') + f' if x is in {self.domain()}'
 
+    def __eq__(self, other: 'LineType'):
+        return other and self.m == other.m and self.b == other.b and self.domain() == other.domain()
+
     @abstractmethod
     def domain(self) -> list:
         '''Returns the domain of the function as a list'''
@@ -55,10 +55,11 @@ class LineSegment(LineType):
     def __init__(self, p1: Vector2, p2: Vector2) -> None:
         self.p1, self.p2 = min([p1, p2], key=lambda i: i.x), max([p1, p2], key=lambda i: i.x)
 
+        self.m, self.b = None, None
+
         if self.p2.x - self.p1.x == 0:
             self.vertical = True
             self.p1, self.p2 = p1, p2
-            self.m = None
         else:
             self.m = (self.p2.y - self.p1.y) / (self.p2.x - self.p1.x)
             self.b = -self.p1.x * self.m + self.p1.y

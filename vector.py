@@ -6,8 +6,7 @@ class Vector2:
 
     def set_length(self, length: float) -> None:
         '''Set the length of the vector to a given value'''
-        m = length / self.get_length()
-        self.x, self.y = self.x * m, self.y * m
+        self = self / self.get_length() * length
         return self
 
     def get_length(self) -> float:
@@ -36,7 +35,7 @@ class Vector2:
         return str((self.x, self.y))
 
     def __mul__(self, other: float) -> 'Vector2':
-        if type(other) in (int, float):
-            return Vector2(self.x * other, self.y * other)
-        else:
-            raise TypeError(f'Can not multiply {type(self)} by a non scalar of type {type(other)}')
+        return Vector2(self.x * other, self.y * other)
+    
+    def __truediv__(self, other: float) -> 'Vector2':
+        return Vector2(self.x / other, self.y / other)

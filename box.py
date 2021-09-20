@@ -23,15 +23,23 @@ class Box:
             if line.intersects(horizontal): intersections += 1
         return bool(intersections % 2)
 
-    def intersects_box(self, b: 'Box') -> bool:
+    def intersects_box(self, b: 'Box') -> list:
         '''Check if Box intersects with another'''
+        lines = []
         for line1 in self.lines:
             for line2 in b.lines:
-                if line1.intersects(line2): return (line1, line2)
-        return None
+                if line1.intersects(line2): 
+                    if not line2 in lines: 
+                        lines.append(line2)
+        return lines
+
+    def intersects_line(self, l: Line) -> bool:
+        for line in self.lines:
+            if line.intersects(l): return True
+        return False
 
     def set_pos(self, v: Vector2):
-        '''Move box by a given amount'''
+        '''Move box to a specific point'''
         change = v - self.pos
         self.pos = v
         for i in self.verticies:
@@ -67,6 +75,7 @@ class Rect(Box):
         '''Set position of the Rectangle'''
         self.pos = v
         self.verticies = self.get_verticies()
+        self.lines = self._get_lines()
 
 class Renderable:
     def __init__(self, box: Box, color: str = 'white') -> None:
